@@ -1,37 +1,20 @@
 from flask import Flask, jsonify, request
 import requests
 import pandas as pd
+import io
 
 app = Flask(__name__)
 
 @app.route("/")
 def index():
-    return "IR BANK API is running!"
+    return "IR Bank API サービス稼働中"
 
 @app.route("/debug")
 def debug():
     try:
         res = requests.get("https://irbank.net/download/fy-profit-and-loss.json")
-        data = res.json()
-        df = pd.DataFrame(data)
-        return jsonify({
-            "columns": list(df.columns),
-            "num_records": len(df),
-            "sample_first_3": df.head(3).to_dict(orient="records")
-        })
+        data = res.text  # JSONテキストのまま取得
+        return jsonify({"raw": data[:200]})  # 先頭200文字だけ表示（全体が大きいので）
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route("/irbank/financial", methods=["GET"])
-def get_financial():
-    code = request.args.get("code")
-    if not code:
-        return jsonify({"error": "code parameter is required"}), 400
-
-    try:
-        res = requests.get("https://irbank.net/download/fy-profit-and-loss.json")
-        df = pd.DataFrame(res.json())
-        matched = df[df["証券コード"].astype(str) == str(code)]
-        return jsonify(matched.to_dict(orient="records"))
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500

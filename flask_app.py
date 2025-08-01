@@ -1,4 +1,18 @@
 from flask import Flask, jsonify
+from irbank_scraper import get_financial_data
+
+app = Flask(__name__)
+
+@app.route('/')
+def index():
+    return "IRBank API is running."
+
+@app.route('/api/financials/<code>')
+def financials(code):
+    data = get_financial_data(code)
+    return jsonify(data)
+from flask import Flask, 
+jsonify
 import requests
 from bs4 import BeautifulSoup
 

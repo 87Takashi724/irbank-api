@@ -1,8 +1,4 @@
-import requests
-from bs4 import BeautifulSoup
-import time
-
-def scrape_irbank(code):
+def get_financial_data(code):
     url = f"https://irbank.net/{code}/financial"
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
@@ -10,7 +6,7 @@ def scrape_irbank(code):
     }
 
     try:
-        time.sleep(5)  # 負荷対策で少し待つ
+        time.sleep(5)
         res = requests.get(url, headers=headers, timeout=10)
         res.encoding = res.apparent_encoding
         res.raise_for_status()
@@ -34,13 +30,9 @@ def scrape_irbank(code):
                 elif "ROE" in label:
                     data["ROE"] = values
 
-        if not data:
-            return {"error": "必要な財務データが取得できませんでした"}
-
         return data
 
-    except requests.exceptions.RequestException as e:
-        return {"error": f"ネットワークエラー: {str(e)}"}
     except Exception as e:
-        return {"error": f"解析中エラー: {str(e)}"}
+        return {"error": str(e)}
+
 

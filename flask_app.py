@@ -1,20 +1,20 @@
-from flask import Flask, jsonify, request
-import requests
-import pandas as pd
-import io
+from bs4 import BeautifulSoup
 
-app = Flask(__name__)
+@app.route("/api/financials/<code>")
+def get_financials(code):
+    url = f"https://irbank.net/{code}/fy"
+    res = requests.get(url)
+    soup = BeautifulSoup(res.text, "html.parser")
 
-@app.route("/")
-def index():
-    return "IR Bank API サービス稼働中"
-
-@app.route("/debug")
-def debug():
     try:
-        res = requests.get("https://irbank.net/download/fy-profit-and-loss.json")
-        data = res.text  # JSONテキストのまま取得
-        return jsonify({"raw": data[:200]})  # 先頭200文字だけ表示（全体が大きいので）
+        table = soup.select_one("table")  # 最初のテーブルを取得
+        headers = [th.text.strip() for th in table.select("thead th")]
+        rows = []
+        for tr in table.select("tbody tr"):
+            cells = [td.text.strip() for td in tr.select("td")]
+            if cells:
+                rows.append(dict(zip(headers, cells)))
+
+        return jsonify({"code": code, "financials": rows})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-

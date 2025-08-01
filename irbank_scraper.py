@@ -1,3 +1,8 @@
+import requests
+from bs4 import BeautifulSoup
+import time
+
+
 def get_financial_data(code):
     url = f"https://irbank.net/{code}/financial"
     headers = {

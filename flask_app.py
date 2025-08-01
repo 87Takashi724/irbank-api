@@ -11,7 +11,7 @@ def index():
 def financials(code):
     data = get_financial_data(code)
     return jsonify(data)
-from flask import Flask, 
+from flask import Flaskß
 jsonify
 import requests
 from bs4 import BeautifulSoup
